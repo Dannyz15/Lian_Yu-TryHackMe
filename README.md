@@ -12,7 +12,7 @@ We start by enumerating the target to discover running services and open ports.
 nmap -sC -sV 10.49.187.90
 ```
 
-gambar
+![Nmap Scan Result](assets/01-Reconnaissance-and-Enumeration/nmap-scan.png)
 
 **Nmap Results:**
 
@@ -23,13 +23,13 @@ gambar
 
 **Web Enumeration (Port 80)**
 
-Visiting the web server on port 80 :
+Visiting the web server on `port 80` :
 
 ```bash
 http://10.49.187.90
 ```
 
-Gambar
+![Website Arrowverse](assets/01-Reconnaissance-and-Enumeration/website-arrowverse.png)
 
 * Website page displays an "ARROWVERSE" themed page describing Oliver Queen's backstory. There are no immediately interactive elements or obvious links, so we need to brute-force the directories.
 
@@ -39,7 +39,7 @@ We will use `gobuster` to find hidden directories :
 gobuster dir -u http://10.49.187.90/ --wordlist /usr/share/dirbuster/wordlists/directory-list-lowercase-2.3-medium.txt
 ```
 
-Gambar
+![gobuster island](assets/01-Reconnaissance-and-Enumeration/gobuster-island.png)
 
 * The scan reveals a hidden directory :
 
@@ -53,7 +53,8 @@ Navigating to :
 http://10.49.187.90/island
 ```
 
-Gambar
+![Website island](assets/01-Reconnaissance-and-Enumeration/website-island.png)
+![soure page island](assets/01-Reconnaissance-and-Enumeration/soure-page-island.png)
 
 * We found out the Code Word by highlighting the `page text` or `viewing the page source`.
 
@@ -69,7 +70,7 @@ Continue our enumeration, we run another `gobuster` scan, this time targeting th
 gobuster dir -u http://10.49.187.90/island --wordlist /usr/share/dirbuster/wordlists/directory-list-lowercase-2.3-medium.txt
 ```
 
-Gambar
+![gobuster 2100](assets/01-Reconnaissance-and-Enumeration/gobuster-2100.png)
 
 * This exposes nested directories :
 
@@ -83,11 +84,11 @@ Navigating to :
 http://10.49.187.90/island/2100 -- (What is the Web Directory you found?)
 ```
 
-Gambar
+![Webiste 2100](assets/01-Reconnaissance-and-Enumeration/website-2100.png)
 
 * Shows a page containing an embedded YouTube video (which appears unavailable).
 
-Gambar
+![soure page 2100](assets/01-Reconnaissance-and-Enumeration/source-page-2100.png)
 
 * Looking at the page source again reveals a files with a `.ticket extension`.
 
@@ -97,7 +98,7 @@ We run a final `gobuster` scan on the `/2100` directory, appending the `-x` flag
 gobuster dir -u http://10.49.187.90/island/2100 --wordlist /usr/share/dirbuster/wordlists/directory-list-lowercase-2.3-medium.txt -x .ticket
 ```
 
-Gambar
+![gobuster green arrow ticket](assets/01-Reconnaissance-and-Enumeration/gobuster-green_arrow.ticket.png)
 
 * The scan successfully locates a file named:
 
@@ -111,13 +112,13 @@ Navigating to :
 http://10.49.187.90/island/2100/green_arrow.ticket
 ```
 
-Gambar
+![Website green arrow ticket](assets/01-Reconnaissance-and-Enumeration/website-green_arrow.ticket.png)
 
-Opening this file in the browser reveals a token :
+* Opening this file in the browser reveals a token :
 
-```bash
-RTy8yhBQdscX
-```
+  ```bash
+  RTy8yhBQdscX
+  ```
 
 The string is encoded in Base58. Using a tool like CyberChef :
 
@@ -127,7 +128,7 @@ https://gchq.github.io/CyberChef/
 
 Use `FromBase58` to decode it.
 
-Gambar
+![Website CyberChef](assets/01-Reconnaissance-and-Enumeration/website-CyberChef-decode.png)
 
 * We uncover the password :
 
@@ -141,7 +142,6 @@ We now have a set of credentials:
 
 ```bash
 # Username: vigilante (from the Code Word)
-
 # Password: !#th3h00d (from the decoded ticket)
 ```
 
@@ -151,7 +151,9 @@ We use these to log into the FTP service running on port 21 :
 ftp 10.49.187.90
 ```
 
-Gambar
+![FTP Service](assets/02-FTP-and-Steganography/FTP-service.png)
+
+* We have successfully logged in.
 
 Once logged in, running :
 
@@ -159,7 +161,7 @@ Once logged in, running :
 ls -al
 ```
 
-Gambar
+![check directory](assets/02-FTP-and-Steganography/ls-al.png)
 
 * We find 3 image files, download all of them :
 
@@ -178,20 +180,22 @@ cd ..
 ls -al
 ```
 
-Gambar
+![check parent directory](assets/02-FTP-and-Steganography/parent-directory.png)
 
-Reveals the home directories of two users :
+* Reveals the home directories of two users :
 
-```bash
-vigilante
-slade
-```
+  ```bash
+  vigilante
+  slade
+  ```
 
 **Analyzing the Images & Fixing Magic Bytes**
 
 Attempting to open the downloaded files locally yields mixed results :
 
-Gambar
+![image aa](assets/02-FTP-and-Steganography/aa.jpg.png)
+![image queen gambit](assets/02-FTP-and-Steganography/Queen's_Gambit.png.png)
+![image leave me alone](assets/02-FTP-and-Steganography/Leave_me_alone.png.png)
 
 * `aa.jpg` and `Queen's_Gambit.png` open perfectly, but `Leave_me_alone.png` throws an `"Unsupported image format"` error.
 
@@ -201,7 +205,7 @@ Running `exiftool` on `Leave_me_alone.png` :
 exiftool Leave_me_alone.png
 ```
 
-Gambar
+![exiftool](assets/02-FTP-and-Steganography/exiftool-Leave_me_alone.png.png)
 
 * Result show :
 
@@ -215,25 +219,27 @@ This indicates the file's magic bytes (file signature) are likely corrupted. We 
 hexeditor Leave_me_alone.png
 ```
 
-Gambar
+![hexeditor](assets/02-FTP-and-Steganography/hexeditor-Leave_me_alone.png.png)
+
+![hexeditor error](assets/02-FTP-and-Steganography/hexeditor-error-PNG-signature.png)
 
 * The first few bytes read `58 45 6F AE`, which is incorrect.
 
-The correct header
+To find out the correct header, we visit this website :
 
 ```bash
 https://en.wikipedia.org/wiki/PNG#Examples
 ```
 
-Gambar
+![Website wikipedia](assets/02-FTP-and-Steganography/website-wikipedia-PNG-Examples.png)
 
 We modify the incorrect bytes in the hex editor to the valid PNG signature `89 50 4E 47` and save the file :
 
-Gambar
+![hexeditor fixed](assets/02-FTP-and-Steganography/hexeditor-fixed-PNG-signature.png)
 
 After change the bytes to the correct one. We open the `Leave_me_alone.png`.
 
-Gambar
+![fixed image](assets/02-FTP-and-Steganography/Leave_me_alone.png-fixed.png)
 
 * The image now opens successfully, revealing an embedded word :
 
@@ -253,7 +259,7 @@ When prompted for a passphrase, we provide the word we extracted from the fixed 
 password
 ```
 
-Gambar
+![steghide](assets/02-FTP-and-Steganography/steghide-extract-sf-aa.jpg.png)
 
 * This successfully extracts a hidden ZIP archive named :
 
@@ -267,7 +273,7 @@ Unzipping `ss.zip` :
 unzip ss.zip
 ```
 
-Gambar
+![unzip ss.zip](assets/02-FTP-and-Steganography/unzip-ss.zip.png)
 
 * Reveal two files :
 
@@ -284,7 +290,7 @@ Then we use command `cat` for read information inside the 2 file we get :
 cat passwd.txt
 ```
 
-Gambar
+![cat passwd](assets/02-FTP-and-Steganography/cat-passwd.txt.png)
 
 * `passwd.txt` contains some flavor text about the island
 
@@ -292,7 +298,7 @@ Gambar
 cat shado
 ```
 
-Gambar
+![cat shado](assets/02-FTP-and-Steganography/cat-shado.txt.png)
 
 * `shado` reveals a string :
   
@@ -308,17 +314,19 @@ We now have a new password `M3tahuman` and we previously identified another user
 ssh slade@10.49.187.90
 ```
 
-Gambar
+![ssh slade](assets/03-Privilege-Escalation/SSH-Access-salde.png)
 
 * Using `M3tahuman` as the password grants us access to the system as `slade`.
 
 Once inside, we check the directory contents :
 
 ```bash
-ls -al
+ls
 ```
 
-Gambar
+![check directory](assets/03-Privilege-Escalation/check-directory-lianyu.png)
+
+* We found `user.txt`.
 
 Read `user.txt` :
 
@@ -326,7 +334,7 @@ Read `user.txt` :
 cat user.txt
 ```
 
-Gambar
+![cat user.txt](assets/03-Privilege-Escalation/FLAG-user.txt.png)
 
 * We found Flag user.txt :
 
@@ -342,7 +350,7 @@ Reading it :
 cat .Important
 ```
 
-Gambar
+![cat important](assets/03-Privilege-Escalation/cat-.Important.png)
 
 * The output reveals a hint : `"root Privileges ? try to find Secret_Mission"`.
 
@@ -352,7 +360,7 @@ To check for basic privilege escalation vectors, we look at the `sudo` permissio
 sudo -l
 ```
 
-Gambar
+![basic privilege](assets/03-Privilege-Escalation/sudo-l-lianyu.png)
 
 * The output reveals that `slade` is allowed to execute `/usr/bin/pkexec` as `root` without providing a password!
 
@@ -364,7 +372,7 @@ sudo pkexec /bin/sh
 
 Running `whoami` and `id` to confirms that we have successfully escalated our privileges to `root`.
 
-Gambar
+![sudo pkexec](assets/03-Privilege-Escalation/sudo-pkexec-lianyu.png)
 
 Check directory :
 
@@ -372,18 +380,20 @@ Check directory :
 ls -al
 ```
 
-Gambar
+![check directory](assets/03-Privilege-Escalation/check-directory-slade.png)
 
 * The output reveals `root.txt`.
 
-Finally, we read the root flag located in the root directory: :
+Finally, we read the root flag located in the root directory :
 
 ```bash
 cat root.txt
 ```
 
-We found Flag root.txt :
+![cat root.txt](assets/03-Privilege-Escalation/FLAG-root.txt.png)
 
-```bash
-THM{MY_W0RD_I5_MY_B0ND_IF_I_ACC3PT_YOUR_CONTRACT_THEN_IT_WILL_BE_COMPL3TED_OR_I'LL_BE_D34D}
-```
+* We found Flag root.txt :
+
+  ```bash
+  THM{MY_W0RD_I5_MY_B0ND_IF_I_ACC3PT_YOUR_CONTRACT_THEN_IT_WILL_BE_COMPL3TED_OR_I'LL_BE_D34D}
+  ```
