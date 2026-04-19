@@ -1,8 +1,6 @@
 # TryHackMe: Lian_Yu Walkthrough
 Room Link: https://tryhackme.com/room/lianyu
 
-This is a comprehensive walkthrough for the Lian_Yu room. The machine heavily relies on thorough web enumeration, manipulating file signatures (magic bytes), steganography, and exploiting sudo privileges for a quick path to root.
-
 ## 🔍 Task 1: Reconnaissance & Web Enumeration
 We start by enumerating the target to discover running services and open ports.
 
