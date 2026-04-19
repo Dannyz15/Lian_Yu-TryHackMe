@@ -171,6 +171,8 @@ ls -al
   get aa.jpg
   ```
 
+![download image](assets/02-FTP-and-Steganography/download-image.png)
+
 While navigating the FTP server, checking the parent directory :
 
 ```bash
@@ -321,7 +323,7 @@ ssh slade@10.49.187.90
 Once inside, we check the directory contents :
 
 ```bash
-ls
+ls -al
 ```
 
 ![check directory](assets/03-Privilege-Escalation/check-directory-lianyu.png)
