@@ -171,7 +171,7 @@ ls -al
   get aa.jpg
   ```
 
-![download image](assets/02-FTP-and-Steganography/download-image.png)
+  ![download image](assets/02-FTP-and-Steganography/download-image.png)
 
 While navigating the FTP server, checking the parent directory :
 
