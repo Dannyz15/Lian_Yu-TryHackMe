@@ -314,7 +314,7 @@ We now have a new password `M3tahuman` and we previously identified another user
 ssh slade@10.49.187.90
 ```
 
-![ssh slade](assets/03-Privilege-Escalation/SSH-Access-salde.png)
+![ssh slade](assets/03-Privilege-Escalation/SSH-Access-slade.png)
 
 * Using `M3tahuman` as the password grants us access to the system as `slade`.
 
