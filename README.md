@@ -308,7 +308,7 @@ cat shado
 
 ## 💻 Task 3: SSH Access & Privilege Escalation
 
-We now have a new password `M3tahuman` and we previously identified another user on the system named `slade`. We can use these to SSH into the target.
+We now have a new password `M3tahuman` and we previously identified another user on the system named `slade`. We can use these credentials to SSH into the target.
 
 ```bash
 ssh slade@10.49.187.90
