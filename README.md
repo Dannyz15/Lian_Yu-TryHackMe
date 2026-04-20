@@ -131,7 +131,7 @@ Use `FromBase58` to decode it.
 * We uncover the password :
 
   ```bash
-  '!#th3h00d' - This is the FTP Password. -- (what is the FTP Password?)
+  !#th3h00d - This is the FTP Password. -- (what is the FTP Password?)
   ```
 
 ## 🔓 Task 2: FTP Access & Steganography
